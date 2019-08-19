@@ -4,6 +4,8 @@ import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
 
+import java.io.IOException;
+
 public class ConvertToPDF {
 
     private ActiveXComponent oleComponent = null;
@@ -21,6 +23,21 @@ public class ConvertToPDF {
     // instance will be displyed on the users screen or not.
     // public static final boolean VISIBLE = true;
     public static final boolean HIDDEN = false;
+
+    static {
+        Runtime.getRuntime().addShutdownHook(releaseResource());
+    }
+
+    private static Thread releaseResource() {
+        Thread thread = new Thread(() -> {
+            try {
+                Runtime.getRuntime().exec("taskkill /f /im WINWORD.EXE"); // kill all Microsoft Word.
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return thread;
+    }
 
     /**
      * Create a new instance of the JacobWordSearch class using the following
@@ -45,13 +62,12 @@ public class ConvertToPDF {
      *        slash to specify the path separator.
      */
     public void openDoc(String docName) {
-        Dispatch disp = null;
-        Variant var = null;
+
 
         // First get a Dispatch object referencing the Documents collection - for
         // collections, think of ArrayLists of objects.
-        var = Dispatch.get(this.oleComponent, "Documents");
-        disp = var.getDispatch();
+        Variant var = Dispatch.get(this.oleComponent, "Documents");
+        Dispatch disp = var.getDispatch();
 
         // Now call the Open method on the Documents collection Dispatch object
         // to both open the file and add it to the collection. It would be possible
